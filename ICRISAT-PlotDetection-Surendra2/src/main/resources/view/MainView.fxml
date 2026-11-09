@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.plotdetection.controller.MainController">
+
+    <!-- ======================== TOP: MenuBar + Toolbar ======================== -->
+    <top>
+        <VBox spacing="0">
+            <MenuBar>
+                <Menu text="☰ File">
+                    <MenuItem text="Import Image" onAction="#onImportImage"/>
+                    <MenuItem text="Import Folder" onAction="#onImportFolder"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Exit" onAction="#onExit"/>
+                </Menu>
+
+                <!-- Edit menu with Undo/Redo -->
+                <Menu text="Edit">
+                    <MenuItem text="Undo" onAction="#onUndo" accelerator="Ctrl+Z"/>
+                    <MenuItem text="Redo" onAction="#onRedo" accelerator="Ctrl+Y"/>
+                </Menu>
+
+                <Menu text="Help">
+                    <MenuItem text="About" onAction="#onAbout"/>
+                </Menu>
+            </MenuBar>
+
+            <ToolBar style="-fx-background-color: #f0f0f0;">
+                <padding>
+                    <Insets top="5" right="5" bottom="5" left="5"/>
+                </padding>
+
+                <!-- Basic buttons -->
+                <Button text="📂 Import Image" onAction="#onImportImage" styleClass="action-btn" style="-fx-background-color: #e0e0e0;"/>
+                <Button text="📁 Import Folder" onAction="#onImportFolder" styleClass="action-btn" style="-fx-background-color: #e0e0e0;"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="Detect Plots" onAction="#onDetectPlots" styleClass="action-btn" 
+                        style="-fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="Add Plot" onAction="#onAddPlot" styleClass="action-btn" 
+                        style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+                <!-- Upload menu: only CSV and JSON (plot coordinates) -->
+                <MenuButton text="Upload" styleClass="action-btn" style="-fx-background-color: #9C27B0; -fx-text-fill: white; -fx-font-weight: bold;">
+                    <items>
+                        <MenuItem text="Import CSV" onAction="#onImportCSV"/>
+                        <MenuItem text="Import JSON" onAction="#onImportJSON"/>
+                    </items>
+                </MenuButton>
+
+                <!-- Crop and Biomass import buttons -->
+                <Button text="Import Crop Data" onAction="#onImportCropData" styleClass="action-btn" 
+                        style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="Import Biomass Data" onAction="#onImportBiomassData" styleClass="action-btn" 
+                        style="-fx-background-color: #00BCD4; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+                <!-- Plot file indicator (CSV/JSON) -->
+                <HBox fx:id="uploadedFileBox" spacing="5" alignment="CENTER_LEFT" visible="false" managed="false">
+                    <Label text="📄 " />
+                    <Label fx:id="uploadedFileLabel" style="-fx-font-weight: bold; -fx-text-fill: #9C27B0;"/>
+                    <Button fx:id="removeFileButton" text="✕" styleClass="action-btn" style="-fx-background-color: transparent; -fx-text-fill: #f44336; -fx-font-weight: bold; -fx-cursor: hand;" onAction="#onRemoveUploadedFile"/>
+                </HBox>
+
+                <!-- Crop file indicator -->
+                <HBox fx:id="cropFileBox" spacing="5" alignment="CENTER_LEFT" visible="false" managed="false">
+                    <Label text="🌾 " />
+                    <Label fx:id="cropFileLabel" style="-fx-font-weight: bold; -fx-text-fill: #E91E63;"/>
+                    <Button fx:id="cropRemoveButton" text="✕" styleClass="action-btn" style="-fx-background-color: transparent; -fx-text-fill: #f44336; -fx-font-weight: bold; -fx-cursor: hand;" onAction="#onRemoveCropFile"/>
+                </HBox>
+
+                <!-- Biomass file indicator -->
+                <HBox fx:id="biomassFileBox" spacing="5" alignment="CENTER_LEFT" visible="false" managed="false">
+                    <Label text="🌿 " />
+                    <Label fx:id="biomassFileLabel" style="-fx-font-weight: bold; -fx-text-fill: #00BCD4;"/>
+                    <Button fx:id="biomassRemoveButton" text="✕" styleClass="action-btn" style="-fx-background-color: transparent; -fx-text-fill: #f44336; -fx-font-weight: bold; -fx-cursor: hand;" onAction="#onRemoveBiomassFile"/>
+                </HBox>
+
+                <Separator orientation="VERTICAL"/>
+                <Button text="Clear" onAction="#onClear" styleClass="action-btn" style="-fx-background-color: #e0e0e0;"/>
+            </ToolBar>
+        </VBox>
+    </top>
+
+    <!-- ======================== CENTER: Image List, Viewer, and Details ======================== -->
+    <center>
+        <HBox spacing="10" style="-fx-padding: 10;">
+            <!-- Left: List of images -->
+            <VBox spacing="5" prefWidth="180" minWidth="150">
+                <Label text="Images in Folder" style="-fx-font-weight: bold;"/>
+                <ListView fx:id="imageListView" prefHeight="400" VBox.vgrow="ALWAYS"/>
+            </VBox>
+
+            <!-- Center: Image Viewer -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Image Viewer" style="-fx-font-weight: bold;"/>
+                <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS"
+                            style="-fx-background-color: #e8e8e8;">
+                    <StackPane>
+                        <ImageView fx:id="imageView" preserveRatio="true"
+                                   onMouseClicked="#onImageViewClicked"/>
+                        <Pane fx:id="overlayPane"/>
+                    </StackPane>
+                </ScrollPane>
+            </VBox>
+
+            <!-- Right: Plot Details Panel -->
+            <VBox spacing="10" prefWidth="280" minWidth="240"
+                  style="-fx-background-color: #f8f8f8; -fx-padding: 10; -fx-border-color: #d0d0d0; -fx-border-width: 1; -fx-border-radius: 4;">
+                <Label text="Plot Details" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                <Label text="Click a rectangle to edit" style="-fx-font-size: 11px; -fx-text-fill: #666;"/>
+                <Separator/>
+
+                <!-- Plot ID -->
+                <GridPane hgap="8" vgap="4">
+                    <Label text="ID:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="plotIdLabel" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-text-fill: #2196F3;"/>
+                </GridPane>
+
+                <!-- Coordinates -->
+                <GridPane hgap="8" vgap="4">
+                    <Label text="X1:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="plotX1Label" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="Y1:" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="plotY1Label" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                </GridPane>
+                <GridPane hgap="8" vgap="4">
+                    <Label text="X2:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="plotX2Label" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="Y2:" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="plotY2Label" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                </GridPane>
+                <GridPane hgap="8" vgap="4">
+                    <Label text="Width:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="plotWidthLabel" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <Label text="Height:" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="plotHeightLabel" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                </GridPane>
+                <GridPane hgap="8" vgap="4">
+                    <Label text="Area:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="plotAreaLabel" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-text-fill: #FF9800;"/>
+                </GridPane>
+
+                <Separator/>
+
+                <!-- Editable fields -->
+                <Label text="Crop Name:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="cropNameField"
+                          promptText="Select Crop Name"
+                          onAction="#onCropSelected"
+                          styleClass="input-field"/>
+
+                <Label text="Crop Type:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="cropTypeCombo" styleClass="input-field" promptText="Select Crop Type"/>
+
+                <Label text="Nitrogen Level:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="nitrogenCombo" styleClass="input-field" promptText="Select Nitrogen Level"/>
+
+                <Label text="Biomass (g/m²):" style="-fx-font-weight: bold;"/>
+                <TextField fx:id="biomassField" promptText="e.g. 12.5" styleClass="input-field"/>
+
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <Label text="Biomass from file:" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="excelBiomassLabel" style="-fx-text-fill: #FF9800; -fx-font-weight: bold;" text="-"/>
+                </HBox>
+
+                <HBox spacing="10">
+                    <Button text="Update" onAction="#onUpdatePlot" styleClass="action-btn"
+                            style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Button text="Save" onAction="#onSavePlot" styleClass="action-btn"
+                            style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Button text="Delete" onAction="#onDeletePlot" styleClass="action-btn"
+                            style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+                </HBox>
+            </VBox>
+        </HBox>
+    </center>
+
+    <!-- ======================== BOTTOM: Status Bar ======================== -->
+    <bottom>
+        <Label fx:id="statusLabel" style="-fx-padding: 6 10 6 10; -fx-background-color: #e0e0e0; -fx-border-color: #cccccc; -fx-border-width: 1 0 0 0;">
+            Status: Ready
+        </Label>
+    </bottom>
+</BorderPane>

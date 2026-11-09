@@ -1,0 +1,40 @@
+/* All action buttons will have this pressed effect */
+.action-btn:pressed {
+    -fx-background-color: #2196F3 !important;
+    -fx-text-fill: white !important;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.6), 10, 0.2, 0, 0);
+}
+
+/* Optional: If you want a smooth transition, add animation */
+.action-btn {
+    -fx-transition: all 0.1s ease;
+}
+/* All action buttons will have this pressed effect */
+.action-btn:pressed {
+    -fx-background-color: #2196F3 !important;
+    -fx-text-fill: white !important;
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.6), 10, 0.2, 0, 0);
+}
+
+/* Uniform style for input fields (TextField and ComboBox) */
+.input-field {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 5 8;
+    -fx-font-size: 13px;
+}
+
+/* Make ComboBox arrow less prominent */
+.input-field .arrow-button {
+    -fx-background-color: transparent;
+}
+.input-field .arrow {
+    -fx-background-color: #666666;
+}
